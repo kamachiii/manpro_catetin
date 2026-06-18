@@ -1,0 +1,7 @@
+# Supabase Local Configuration
+
+[auth]
+enabled = true
+
+[storage]
+enabled = true
