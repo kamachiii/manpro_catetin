@@ -1,21 +1,12 @@
 import React from "react";
 import { requireUser } from "@/lib/auth/require-user";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import DashboardSidebarLayout from "@/components/layout/dashboard-sidebar-layout";
 import Link from "next/link";
 import { Book, Calendar, User, Tag, ArrowRight, Bookmark } from "lucide-react";
 
 export default async function BookmarksPage() {
   const user = await requireUser();
   const supabase = await createServerSupabaseClient();
-
-  // Fetch student profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
 
   // Fetch bookmarked notes
   const { data: bookmarks, error } = await supabase
@@ -58,20 +49,7 @@ export default async function BookmarksPage() {
       )
     : [];
 
-  // Logout server action
-  async function logout() {
-    "use server";
-    const supabase = await createServerSupabaseClient();
-    await supabase.auth.signOut();
-    redirect("/login");
-  }
-
   return (
-    <DashboardSidebarLayout
-      profile={profile}
-      userEmail={user.email || ""}
-      logoutAction={logout}
-    >
       <div className="space-y-6">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
@@ -169,6 +147,5 @@ export default async function BookmarksPage() {
           </div>
         )}
       </div>
-    </DashboardSidebarLayout>
   );
 }
