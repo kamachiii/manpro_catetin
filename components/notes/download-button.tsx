@@ -10,6 +10,7 @@ interface DownloadButtonProps {
   coinPrice: number;
   userCoins: number;
   isOwner: boolean;
+  hasDownloaded: boolean;
 }
 
 export default function DownloadButton({
@@ -18,6 +19,7 @@ export default function DownloadButton({
   coinPrice,
   userCoins,
   isOwner,
+  hasDownloaded,
 }: DownloadButtonProps) {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -103,7 +105,11 @@ export default function DownloadButton({
         ) : (
           <>
             <Download className="h-5 w-5" />
-            {isOwner ? "Unduh Gratis (Milik Anda)" : `Unduh Catatan (${coinPrice} Koin)`}
+            {isOwner
+              ? "Unduh Gratis (Milik Anda)"
+              : hasDownloaded
+              ? "Unduh Catatan"
+              : `Unduh Catatan (${coinPrice} Koin)`}
           </>
         )}
       </button>

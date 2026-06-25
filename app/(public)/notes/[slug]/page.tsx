@@ -108,6 +108,20 @@ export default async function NoteDetailPage({
       .maybeSingle();
     isBookmarked = !!bookmark;
   }
+  const isOwner = user ? note.user_id === user.id : false;
+  const canAccess = hasDownloaded || isOwner;
+
+  let signedUrl = "";
+  if (canAccess) {
+    try {
+      const { data: signData } = await supabase.storage
+        .from("notes-files")
+        .createSignedUrl(note.file_path, 3600); // 1 hour expiry
+      signedUrl = signData?.signedUrl || "";
+    } catch (err) {
+      console.error("Error creating signed URL for note preview:", err);
+    }
+  }
 
   const reviewsCount = reviews?.length ?? 0;
   const averageRating = (reviews && reviewsCount > 0)
@@ -167,27 +181,37 @@ export default async function NoteDetailPage({
                 <FileText className="h-5 w-5 text-primary" />
                 <h2 className="text-sm font-bold">Pratinjau Dokumen (Preview)</h2>
               </div>
-              <div className="relative p-8 flex justify-center items-center h-[400px] bg-slate-50 dark:bg-zinc-900/50">
-                {/* Mocked Document Page with Blur */}
-                <div className="w-full max-w-md h-full bg-white dark:bg-zinc-800 border border-border shadow-sm rounded-lg p-6 filter blur-[5px] select-none pointer-events-none flex flex-col gap-4">
-                  <div className="h-6 w-3/4 bg-slate-200 dark:bg-zinc-700 rounded" />
-                  <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                  <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                  <div className="h-4 w-5/6 bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                  <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                  <div className="h-4 w-2/3 bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                </div>
+              <div className="relative p-4 flex justify-center items-center min-h-[400px] w-full bg-slate-50 dark:bg-zinc-900/50">
+                {canAccess && signedUrl ? (
+                  <iframe
+                    src={`${signedUrl}#toolbar=0`}
+                    className="w-full h-[600px] border-0 rounded-lg shadow-sm"
+                    title={note.title}
+                  />
+                ) : (
+                  <>
+                    {/* Mocked Document Page with Blur */}
+                    <div className="w-full max-w-md h-[360px] bg-white dark:bg-zinc-800 border border-border shadow-sm rounded-lg p-6 filter blur-[5px] select-none pointer-events-none flex flex-col gap-4">
+                      <div className="h-6 w-3/4 bg-slate-200 dark:bg-zinc-700 rounded" />
+                      <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
+                      <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
+                      <div className="h-4 w-5/6 bg-slate-100 dark:bg-zinc-700/50 rounded" />
+                      <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
+                      <div className="h-4 w-2/3 bg-slate-100 dark:bg-zinc-700/50 rounded" />
+                    </div>
 
-                {/* Padlock Overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[2px]">
-                  <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-sm">
-                    <Lock className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-base font-bold text-foreground">Dokumen Terkunci</h3>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-xs text-center px-4">
-                    Unduh file lengkap catatan kuliah untuk membuka seluruh materi pelajaran ini.
-                  </p>
-                </div>
+                    {/* Padlock Overlay */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[2px]">
+                      <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-sm">
+                        <Lock className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-base font-bold text-foreground">Dokumen Terkunci</h3>
+                      <p className="text-xs text-muted-foreground mt-1 max-w-xs text-center px-4">
+                        Unduh file lengkap catatan kuliah untuk membuka seluruh materi pelajaran ini.
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -287,6 +311,7 @@ export default async function NoteDetailPage({
                   coinPrice={note.coin_price}
                   userCoins={userProfile?.coin_balance ?? 0}
                   isOwner={user ? note.user_id === user.id : false}
+                  hasDownloaded={hasDownloaded}
                 />
                 {(!user || note.user_id !== user.id) && (
                   <BookmarkButton
