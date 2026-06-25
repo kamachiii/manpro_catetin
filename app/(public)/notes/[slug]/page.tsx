@@ -189,28 +189,25 @@ export default async function NoteDetailPage({
                     title={note.title}
                   />
                 ) : (
-                  <>
-                    {/* Mocked Document Page with Blur */}
-                    <div className="w-full max-w-md h-[360px] bg-white dark:bg-zinc-800 border border-border shadow-sm rounded-lg p-6 filter blur-[5px] select-none pointer-events-none flex flex-col gap-4">
-                      <div className="h-6 w-3/4 bg-slate-200 dark:bg-zinc-700 rounded" />
-                      <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                      <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                      <div className="h-4 w-5/6 bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                      <div className="h-4 w-full bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                      <div className="h-4 w-2/3 bg-slate-100 dark:bg-zinc-700/50 rounded" />
-                    </div>
-
-                    {/* Padlock Overlay */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-[2px]">
-                      <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-sm">
-                        <Lock className="h-6 w-6" />
+                  <div className="relative w-full h-[600px] flex flex-col">
+                    {/* Render Page 1 Preview PDF */}
+                    <iframe
+                      src={`/api/notes/preview?noteId=${note.id}#toolbar=0`}
+                      className="w-full h-full border-0 rounded-lg shadow-sm"
+                      title={`${note.title} - Pratinjau Halaman 1`}
+                    />
+                    
+                    {/* Locked overlay prompt at the bottom of the iframe/container */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/95 to-transparent pt-24 pb-8 px-6 flex flex-col items-center justify-end text-center pointer-events-auto">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3 shadow-sm">
+                        <Lock className="h-5 w-5" />
                       </div>
-                      <h3 className="text-base font-bold text-foreground">Dokumen Terkunci</h3>
-                      <p className="text-xs text-muted-foreground mt-1 max-w-xs text-center px-4">
-                        Unduh file lengkap catatan kuliah untuk membuka seluruh materi pelajaran ini.
+                      <h3 className="text-sm font-bold text-foreground">Halaman Selanjutnya Terkunci</h3>
+                      <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                        Anda sedang melihat pratinjau gratis Halaman 1. Beli/unduh catatan lengkap ini untuk membuka seluruh materi.
                       </p>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
